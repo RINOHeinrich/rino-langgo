@@ -5,7 +5,7 @@ type TokenType int
 const (
 	WORD TokenType = iota
 	NUMBER
-	PUNCTUATION
+	OPERATOR
 	SPACE
 	NEWLINE
 	EOF
@@ -47,26 +47,28 @@ func (i *Lexer) Analyse(analyzedString string) {
 		} else if char == '\n' {
 			token.SetValue("\n")
 			token.SetTokenType(NEWLINE)
-		} else if char == ',' || char == '!' || char == '?' {
+		} else if char == '+' || char == '!' || char == '-' || char == '*' || char == '/' {
 			token.SetValue(string(char))
-			token.SetTokenType(PUNCTUATION)
-		} else if char >= '0' && char <= '9' || char == '.' {
-			token.AppendValue(string(char))
-			token.SetTokenType(NUMBER)
-			//	(i.mTokenSlice) = append(i.mTokenSlice, token)
-			continue
+			token.SetTokenType(OPERATOR)
 		} else {
 			token.AppendValue(string(char))
 			token.SetTokenType(WORD)
+			if char >= '0' && char <= '9' || char == '.' {
+				token.SetTokenType(NUMBER)
+			}
+			// if the token slice is empty, append the token
 			if len(i.mTokenSlice) == 0 {
 				(i.mTokenSlice) = append(i.mTokenSlice, token)
 				continue
 			}
-			if i.mTokenSlice[index-1].mTokenType != WORD {
+			// if the previous token is a word or a number, append the token
+			if i.mTokenSlice[index-1].mTokenType != WORD && i.mTokenSlice[index-1].mTokenType != NUMBER {
 				(i.mTokenSlice) = append(i.mTokenSlice, token)
+				//if token contains a word then set token type to word
 				continue
 			} else {
-				i.mTokenSlice[index-1].mValue = token.GetValue()
+				i.mTokenSlice[index-1] = token
+				//i.mTokenSlice[index-1].mTokenType = token.GetTokenType()
 				continue
 			}
 
